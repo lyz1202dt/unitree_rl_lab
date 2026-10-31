@@ -1,0 +1,167 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="mydog_DIAN">
+  <compiler angle="radian" meshdir="assets" autolimits="true" />
+  <option timestep="0.005" gravity="0 0 -9.81" integrator="implicitfast" />
+  <asset>
+    <texture name="sky" type="skybox" builtin="gradient" rgb1="0.55 0.7 0.85" rgb2="0.95 0.96 0.98" width="512" height="3072" />
+    <texture name="ground_checker" type="2d" builtin="checker" rgb1="0.38 0.43 0.47" rgb2="0.68 0.72 0.75" width="512" height="512" />
+    <material name="ground_material" texture="ground_checker" texrepeat="2 2" texuniform="true" reflectance="0" />
+    <mesh name="base_link_visual_mesh" file="visual/base_link.stl" />
+    <mesh name="base_link_collision_mesh" file="collision/base_link.obj" />
+    <mesh name="FL_J1_Link_visual_mesh" file="visual/FL_J1_Link.stl" />
+    <mesh name="FL_J1_Link_collision_mesh" file="collision/FL_J1_Link.stl" />
+    <mesh name="FL_J2_Link_visual_mesh" file="visual/FL_J2_Link.stl" />
+    <mesh name="FL_J2_Link_collision_mesh" file="collision/FL_J2_Link.stl" />
+    <mesh name="FL_J3_Link_visual_mesh" file="visual/FL_J3_Link.stl" />
+    <mesh name="FL_J3_Link_collision_mesh" file="collision/FL_J3_Link.stl" />
+    <mesh name="FL_FOOT_Link_visual_mesh" file="visual/FL_FOOT_Link.stl" />
+    <mesh name="FL_FOOT_Link_collision_mesh" file="collision/FL_FOOT_Link.stl" />
+    <mesh name="FR_J1_Link_visual_mesh" file="visual/FR_J1_Link.stl" />
+    <mesh name="FR_J1_Link_collision_mesh" file="collision/FR_J1_Link.stl" />
+    <mesh name="FR_J2_Link_visual_mesh" file="visual/FR_J2_Link.stl" />
+    <mesh name="FR_J2_Link_collision_mesh" file="collision/FR_J2_Link.stl" />
+    <mesh name="FR_J3_Link_visual_mesh" file="visual/FR_J3_Link.stl" />
+    <mesh name="FR_J3_Link_collision_mesh" file="collision/FR_J3_Link.stl" />
+    <mesh name="FR_FOOT_Link_visual_mesh" file="visual/FR_FOOT_Link.stl" />
+    <mesh name="FR_FOOT_Link_collision_mesh" file="collision/FR_FOOT_Link.stl" />
+    <mesh name="RL_J1_Link_visual_mesh" file="visual/RL_J1_Link.stl" />
+    <mesh name="RL_J1_Link_collision_mesh" file="collision/RL_J1_Link.stl" />
+    <mesh name="RL_J2_Link_visual_mesh" file="visual/RL_J2_Link.stl" />
+    <mesh name="RL_J2_Link_collision_mesh" file="collision/RL_J2_Link.stl" />
+    <mesh name="RL_J3_Link_visual_mesh" file="visual/RL_J3_Link.stl" />
+    <mesh name="RL_J3_Link_collision_mesh" file="collision/RL_J3_Link.stl" />
+    <mesh name="RL_FOOT_Link_visual_mesh" file="visual/RL_FOOT_Link.stl" />
+    <mesh name="RL_FOOT_Link_collision_mesh" file="collision/RL_FOOT_Link.stl" />
+    <mesh name="RR_J1_Link_visual_mesh" file="visual/RR_J1_Link.stl" />
+    <mesh name="RR_J1_Link_collision_mesh" file="collision/RR_J1_Link.stl" />
+    <mesh name="RR_J2_Link_visual_mesh" file="visual/RR_J2_Link.stl" />
+    <mesh name="RR_J2_Link_collision_mesh" file="collision/RR_J2_Link.stl" />
+    <mesh name="RR_J3_Link_visual_mesh" file="visual/RR_J3_Link.stl" />
+    <mesh name="RR_J3_Link_collision_mesh" file="collision/RR_J3_Link.stl" />
+    <mesh name="RR_FOOT_Link_visual_mesh" file="visual/RR_FOOT_Link.stl" />
+    <mesh name="RR_FOOT_Link_collision_mesh" file="collision/RR_FOOT_Link.stl" />
+  </asset>
+  <worldbody>
+    <light pos="0 0 3" directional="true" dir="0 0 -1" />
+    <geom name="ground" type="plane" size="10 10 0.1" material="ground_material" friction="1 0.005 0.0001" contype="2" conaffinity="1" />
+    <body name="base_link" pos="0 0 0.44">
+      <freejoint name="root" />
+      <site name="imu" pos="0 0 0" size="0.005" rgba="0 0 0 0" />
+      <inertial pos="0.00018059 -0.00081830 -0.07380796" mass="8.58072460" fullinertia="0.05343931 0.15760390 0.18679928 0.00002899 0.00007938 -0.00018032" />
+      <geom name="base_link_visual" type="mesh" mesh="base_link_visual_mesh" rgba="0.866666666666667 0.909803921568627 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+      <geom name="base_link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="base_link_collision_mesh" />
+      <body name="FL_J1_Link" pos="0.1965 -0.070382 -0.0675">
+        <joint name="FL_J1" type="hinge" axis="1 0 0" range="-1.0472 1.0472" damping="0" armature="0" />
+        <inertial pos="0.05819740 0.00149715 0.00004781" mass="1.03259878" fullinertia="0.00097941 0.00160779 0.00128347 0.00001078 0.00000085 0.00000102" />
+        <geom name="FL_J1_Link_visual" type="mesh" mesh="FL_J1_Link_visual_mesh" rgba="0.86667 0.9098 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+        <geom name="FL_J1_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="FL_J1_Link_collision_mesh" />
+        <body name="FL_J2_Link" pos="0.063608 -0.02475 0">
+          <joint name="FL_J2" type="hinge" axis="0 -1 0" range="-1.5708 1.5708" damping="0" armature="0" />
+          <inertial pos="-0.01872873 -0.05384222 0.00360490" mass="1.46858688" fullinertia="0.00222981 0.00554064 0.00571149 0.00095221 -0.00031894 -0.00016999" />
+          <geom name="FL_J2_Link_visual" type="mesh" mesh="FL_J2_Link_visual_mesh" rgba="0.86667 0.9098 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+          <geom name="FL_J2_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="FL_J2_Link_collision_mesh" />
+          <body name="FL_J3_Link" pos="-0.2 -0.111 0">
+            <joint name="FL_J3" type="hinge" axis="0 -1 0" range="-0.8552 0.8552" damping="0" armature="0" />
+            <inertial pos="0.04760400 0.02250000 -0.08873009" mass="0.22568964" fullinertia="0.00100424 0.00116272 0.00018054 0 -0.00034404 0" />
+            <geom name="FL_J3_Link_visual" type="mesh" mesh="FL_J3_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+            <geom name="FL_J3_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="FL_J3_Link_collision_mesh" />
+            <body name="FL_FOOT_Link" pos="0.065525 0.015683 -0.2052">
+              <inertial pos="-0.00469772 0.00682377 -0.01181205" mass="0.04743636" fullinertia="0.00001026 0.00001411 0.00001319 0 -0.00000135 0" />
+              <geom name="FL_FOOT_Link_visual" type="mesh" mesh="FL_FOOT_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+              <geom name="FL_FOOT_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="FL_FOOT_Link_collision_mesh" />
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="FR_J1_Link" pos="0.193 0.069618 -0.0675">
+        <joint name="FR_J1" type="hinge" axis="1 0 0" range="-1.0472 1.0472" damping="0" armature="0" />
+        <inertial pos="0.06169740 -0.00149715 -0.00004781" mass="1.03259878" fullinertia="0.00097941 0.00160779 0.00128347 -0.00001078 -0.00000085 0.00000102" />
+        <geom name="FR_J1_Link_visual" type="mesh" mesh="FR_J1_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+        <geom name="FR_J1_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="FR_J1_Link_collision_mesh" />
+        <body name="FR_J2_Link" pos="0.067108 0.02225 0">
+          <joint name="FR_J2" type="hinge" axis="0 1 0" range="-1.5708 1.5708" damping="0" armature="0" />
+          <inertial pos="-0.01848412 0.05633565 0.00353374" mass="1.46816518" fullinertia="0.00223012 0.00554819 0.00571825 -0.00096809 -0.00032339 0.00017277" />
+          <geom name="FR_J2_Link_visual" type="mesh" mesh="FR_J2_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+          <geom name="FR_J2_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="FR_J2_Link_collision_mesh" />
+          <body name="FR_J3_Link" pos="-0.2 0.1135 0">
+            <joint name="FR_J3" type="hinge" axis="0 1 0" range="-0.8552 0.8552" damping="0" armature="0" />
+            <inertial pos="0.04760400 -0.02250000 -0.08873009" mass="0.22568964" fullinertia="0.00100424 0.00116272 0.00018054 0 -0.00034404 0" />
+            <geom name="FR_J3_Link_visual" type="mesh" mesh="FR_J3_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+            <geom name="FR_J3_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="FR_J3_Link_collision_mesh" />
+            <body name="FR_FOOT_Link" pos="0.065525 -0.014423 -0.2052">
+              <inertial pos="-0.00469772 -0.00806962 -0.01181205" mass="0.04743636" fullinertia="0.00001026 0.00001411 0.00001319 0 -0.00000135 0" />
+              <geom name="FR_FOOT_Link_visual" type="mesh" mesh="FR_FOOT_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+              <geom name="FR_FOOT_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="FR_FOOT_Link_collision_mesh" />
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="RL_J1_Link" pos="-0.1965 -0.070382 -0.0675">
+        <joint name="RL_J1" type="hinge" axis="-1 0 0" range="-1.0472 1.0472" damping="0" armature="0" />
+        <inertial pos="-0.05811771 0.00149715 0.00004781" mass="1.03259878" fullinertia="0.00097941 0.00160689 0.00128257 0.00000236 0.00000032 0.00000102" />
+        <geom name="RL_J1_Link_visual" type="mesh" mesh="RL_J1_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+        <geom name="RL_J1_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="RL_J1_Link_collision_mesh" />
+        <body name="RL_J2_Link" pos="-0.063608 -0.02475 0">
+          <joint name="RL_J2" type="hinge" axis="0 -1 0" range="-1.5708 1.5708" damping="0" armature="0" />
+          <inertial pos="-0.01842372 -0.05382248 0.00360220" mass="1.46767683" fullinertia="0.00222854 0.00553137 0.00570128 0.00096458 -0.00032071 -0.00016990" />
+          <geom name="RL_J2_Link_visual" type="mesh" mesh="RL_J2_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+          <geom name="RL_J2_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="RL_J2_Link_collision_mesh" />
+          <body name="RL_J3_Link" pos="-0.2 -0.111 0">
+            <joint name="RL_J3" type="hinge" axis="0 -1 0" range="-0.8552 0.8552" damping="0" armature="0" />
+            <inertial pos="0.04760400 0.02250000 -0.08873009" mass="0.22568964" fullinertia="0.00100424 0.00116272 0.00018054 0 -0.00034404 0" />
+            <geom name="RL_J3_Link_visual" type="mesh" mesh="RL_J3_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+            <geom name="RL_J3_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="RL_J3_Link_collision_mesh" />
+            <body name="RL_FOOT_Link" pos="0.0655245119188879 0.015683113633143 -0.205197849955197">
+              <inertial pos="-0.00469772 0.00682377 -0.01181205" mass="0.04743636" fullinertia="0.00001026 0.00001411 0.00001319 0 -0.00000135 0" />
+              <geom name="RL_FOOT_Link_visual" type="mesh" mesh="RL_FOOT_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+              <geom name="RL_FOOT_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="RL_FOOT_Link_collision_mesh" />
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="RR_J1_Link" pos="-0.1965 0.069618 -0.0675">
+        <joint name="RR_J1" type="hinge" axis="-1 0 0" range="-1.0472 1.0472" damping="0" armature="0" />
+        <inertial pos="-0.05811771 -0.00149715 -0.00004781" mass="1.03259878" fullinertia="0.00097941 0.00160689 0.00128257 -0.00000236 -0.00000032 0.00000102" />
+        <geom name="RR_J1_Link_visual" type="mesh" mesh="RR_J1_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+        <geom name="RR_J1_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="RR_J1_Link_collision_mesh" />
+        <body name="RR_J2_Link" pos="-0.063608 0.02475 0">
+          <joint name="RR_J2" type="hinge" axis="0 1 0" range="-1.5708 1.5708" damping="0" armature="0" />
+          <inertial pos="-0.01850182 0.05384029 0.00353623" mass="1.46850057" fullinertia="0.00223037 0.00555373 0.00572383 -0.00096850 -0.00032320 0.00017286" />
+          <geom name="RR_J2_Link_visual" type="mesh" mesh="RR_J2_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+          <geom name="RR_J2_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="RR_J2_Link_collision_mesh" />
+          <body name="RR_J3_Link" pos="-0.2 0.111 0">
+            <joint name="RR_J3" type="hinge" axis="0 1 0" range="-0.8552 0.8552" damping="0" armature="0" />
+            <inertial pos="0.04760400 -0.02250000 -0.08873009" mass="0.22568964" fullinertia="0.00100424 0.00116272 0.00018054 0 -0.00034404 0" />
+            <geom name="RR_J3_Link_visual" type="mesh" mesh="RR_J3_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+            <geom name="RR_J3_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="RR_J3_Link_collision_mesh" />
+            <body name="RR_FOOT_Link" pos="0.065525 -0.014423 -0.2052">
+              <inertial pos="-0.00469772 -0.00806962 -0.01181205" mass="0.04743636" fullinertia="0.00001026 0.00001411 0.00001319 0 -0.00000135 0" />
+              <geom name="RR_FOOT_Link_visual" type="mesh" mesh="RR_FOOT_Link_visual_mesh" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" pos="0 0 0" />
+              <geom name="RR_FOOT_Link_collision" contype="1" conaffinity="2" rgba="0 0 0 0" group="3" pos="0 0 0" type="mesh" mesh="RR_FOOT_Link_collision_mesh" />
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <motor name="FL_J1_motor" joint="FL_J1" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="FL_J2_motor" joint="FL_J2" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="FL_J3_motor" joint="FL_J3" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="FR_J1_motor" joint="FR_J1" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="FR_J2_motor" joint="FR_J2" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="FR_J3_motor" joint="FR_J3" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="RL_J1_motor" joint="RL_J1" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="RL_J2_motor" joint="RL_J2" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="RL_J3_motor" joint="RL_J3" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="RR_J1_motor" joint="RR_J1" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="RR_J2_motor" joint="RR_J2" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+    <motor name="RR_J3_motor" joint="RR_J3" gear="1" ctrllimited="true" ctrlrange="-25 25" />
+  </actuator>
+  <sensor>
+    <gyro name="base_gyro" site="imu" />
+  </sensor>
+  <keyframe>
+    <key name="home" qpos="0 0 0.44 1 0 0 0 0.0 0.9 -0.5 0.0 -0.9 0.5 0.0 0.7 -0.5 0.0 -0.7 0.5" />
+  </keyframe>
+</mujoco>
