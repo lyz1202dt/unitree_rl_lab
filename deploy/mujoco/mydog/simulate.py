@@ -28,26 +28,29 @@ DEFAULT_POS = {
 }
 DEFAULT_KP = 40.0
 DEFAULT_KD = 0.4
-# Startup poses match custom_quad's deployment_policy/custom_quad/base.yaml.
+TORQUE_LIMIT = 25.0
+PRESTAND_POS = {
+    "FL_J1": -0.0, "FL_J2": 0.2, "FL_J3": 0.5,
+    "FR_J1": 0.0, "FR_J2": -0.2, "FR_J3": -0.5,
+    "RL_J1": 0.0, "RL_J2": 0.2, "RL_J3": 0.5,
+    "RR_J1": 0.0, "RR_J2": -0.2, "RR_J3": -0.5,
+}
+# Initial and final prone pose, distinct from the shared transition pose above.
 PRONE_POS = {
     "FL_J1": 0.0, "FL_J2": -0.9, "FL_J3": 0.6,
     "FR_J1": 0.0, "FR_J2": 0.9, "FR_J3": -0.6,
     "RL_J1": 0.0, "RL_J2": -0.9, "RL_J3": 0.6,
     "RR_J1": 0.0, "RR_J2": 0.9, "RR_J3": -0.6,
 }
-STAND_POS = {
-    "FL_J1": 0.0, "FL_J2": 0.9, "FL_J3": -0.5,
-    "FR_J1": 0.0, "FR_J2": -0.9, "FR_J3": 0.5,
-    "RL_J1": 0.0, "RL_J2": 0.7, "RL_J3": -0.5,
-    "RR_J1": 0.0, "RR_J2": -0.7, "RR_J3": 0.5,
-}
 PRONE_BASE_HEIGHT = 0.165
 PASSIVE_KD = 0.3
-# The hardware fixed gains (25/0.5) cannot raise this MuJoCo model under its
-# 25 Nm torque limit. Use the mydog deployment profile's RL gains for get-up.
-STAND_KP = 100.0
+# Shared gains for posture transitions and standing hold.
+STAND_KP = 65.0
 STAND_KD = 1.0
-GETUP_DURATION = 3.0
+PRESTAND_DURATION = 1.0  # Prone <-> shared transition pose.
+GETUP_DURATION = 3.0  # Shared transition pose -> standing.
+LIE_DOWN_DURATION = 3.0  # Current pose -> shared transition pose when lying down.
+PLAYBACK_SPEEDS = (0.1, 0.25, 0.5, 1.0)
 COMMAND_STEP = 0.1
 COMMAND_LIMITS = ((-1.0, 1.0), (-0.4, 0.4), (-1.0, 1.0))
 KEYPAD_INCREMENTS = {
@@ -62,10 +65,11 @@ KEYPAD_STOP = {glfw.KEY_KP_5}
 
 
 class StartupController:
-    """Mirror passive, timed get-up and standing states before policy control."""
+    """Handle passive, get-up, standing, policy and lie-down transitions."""
 
-    def __init__(self, prone: np.ndarray, stand: np.ndarray):
+    def __init__(self, prone: np.ndarray, prestand: np.ndarray, stand: np.ndarray):
         self.prone = prone
+        self.prestand = prestand
         self.stand = stand
         self.mode = "passive"
         self.start_pos = prone.copy()
@@ -75,25 +79,26 @@ class StartupController:
     def request_stand(self, current_pos: np.ndarray) -> bool:
         if self.mode not in ("passive", "policy"):
             return False
-        self.prepose_needed = self.mode == "passive" and np.max(np.abs(current_pos - self.prone)) >= 0.1
+        self.prepose_needed = self.mode == "passive"
         self.start_pos = current_pos.copy()
         self.elapsed = 0.0
         self.mode = "getup"
         return True
 
     def getup_target(self, dt: float) -> np.ndarray:
-        self.elapsed = min(GETUP_DURATION, self.elapsed + dt)
-        if self.elapsed >= GETUP_DURATION - 1e-9:
-            self.elapsed = GETUP_DURATION
-        if self.prepose_needed and self.elapsed <= 1.0:
-            target = (1.0 - self.elapsed) * self.start_pos + self.elapsed * self.prone
-        elif self.prepose_needed:
-            alpha = (self.elapsed - 1.0) / 2.0
-            target = (1.0 - alpha) * self.prone + alpha * self.stand
+        prestand_duration = PRESTAND_DURATION if self.prepose_needed else 0.0
+        total_duration = prestand_duration + GETUP_DURATION
+        self.elapsed = min(total_duration, self.elapsed + dt)
+        if self.elapsed >= total_duration - 1e-9:
+            self.elapsed = total_duration
+        if self.prepose_needed and self.elapsed <= prestand_duration:
+            alpha = self.elapsed / prestand_duration
+            target = (1.0 - alpha) * self.start_pos + alpha * self.prestand
         else:
-            alpha = self.elapsed / GETUP_DURATION
-            target = (1.0 - alpha) * self.start_pos + alpha * self.stand
-        if self.elapsed >= GETUP_DURATION:
+            alpha = (self.elapsed - prestand_duration) / GETUP_DURATION
+            start_pos = self.prestand if self.prepose_needed else self.start_pos
+            target = (1.0 - alpha) * start_pos + alpha * self.stand
+        if self.elapsed >= total_duration:
             self.mode = "standing"
         return target
 
@@ -102,6 +107,29 @@ class StartupController:
             return False
         self.mode = "policy"
         return True
+
+    def request_lie_down(self, current_pos: np.ndarray) -> bool:
+        if self.mode not in ("getup", "standing", "policy"):
+            return False
+        self.start_pos = current_pos.copy()
+        self.elapsed = 0.0
+        self.mode = "lie_down"
+        return True
+
+    def get_lie_down_target(self, dt: float) -> np.ndarray:
+        total_duration = LIE_DOWN_DURATION + PRESTAND_DURATION
+        self.elapsed = min(total_duration, self.elapsed + dt)
+        if self.elapsed >= total_duration - 1e-9:
+            self.elapsed = total_duration
+        if self.elapsed <= LIE_DOWN_DURATION:
+            alpha = self.elapsed / LIE_DOWN_DURATION
+            target = (1.0 - alpha) * self.start_pos + alpha * self.prestand
+        else:
+            alpha = (self.elapsed - LIE_DOWN_DURATION) / PRESTAND_DURATION
+            target = (1.0 - alpha) * self.prestand + alpha * self.prone
+        if self.elapsed >= total_duration:
+            self.mode = "passive"
+        return target
 
 
 def update_command(command: np.ndarray, keycode: int) -> bool:
@@ -260,17 +288,20 @@ def run(args: argparse.Namespace) -> None:
     qvel_ids = model.jnt_dofadr[joint_ids]
     motor_ids = np.asarray(motor_ids)
     prone = np.array([PRONE_POS[name] for name in names])
-    stand = np.array([STAND_POS[name] for name in names])
+    prestand = np.array([PRESTAND_POS[name] for name in names])
+    # Reuse the policy defaults in actor joint order, including deploy.yaml overrides.
+    stand = defaults.copy()
     joint_ranges = model.jnt_range[joint_ids]
-    for pose_name, pose in (("prone", prone), ("stand", stand), ("policy default", defaults)):
+    for pose_name, pose in (("prone", prone), ("pre-stand", prestand), ("stand", stand), ("policy default", defaults)):
         if np.any(pose < joint_ranges[:, 0]) or np.any(pose > joint_ranges[:, 1]):
             raise ValueError(f"The {pose_name} pose exceeds the scene's joint limits")
     data.qpos[2] = PRONE_BASE_HEIGHT
     data.qpos[qpos_ids] = prone
     data.qvel[:] = 0.0
     mujoco.mj_forward(model, data)
-    startup = StartupController(prone, stand)
-    print("Startup state: prone/passive. NumPad 1: stand; after standing, NumPad 0: start policy.")
+    startup = StartupController(prone, prestand, stand)
+    print("Startup state: prone/passive. NumPad 1: stand; after standing, NumPad 0: start policy; "
+          "NumPad 3: lie down and return to passive.")
 
     command = np.array([args.vx, args.vy, args.yaw], dtype=np.float64)
     last_action = np.zeros(12, dtype=np.float64)
@@ -305,14 +336,21 @@ def run(args: argparse.Namespace) -> None:
         nonlocal last_action, target, logged_rows, policy_step_number
         if startup.mode == "passive":
             torques = -PASSIVE_KD * data.qvel[qvel_ids]
-        elif startup.mode in ("getup", "standing"):
+        elif startup.mode in ("getup", "standing", "lie_down"):
             if startup.mode == "getup":
                 target = startup.getup_target(model.opt.timestep)
                 if startup.mode == "standing":
                     print("Standing pose reached; NumPad 0 starts policy inference.", flush=True)
+            elif startup.mode == "lie_down":
+                target = startup.get_lie_down_target(model.opt.timestep)
+                if startup.mode == "passive":
+                    print("Lie-down transition finished; passive damping active.", flush=True)
             else:
                 target = stand
-            torques = STAND_KP * (target - data.qpos[qpos_ids]) - STAND_KD * data.qvel[qvel_ids]
+            if startup.mode == "passive":
+                torques = -PASSIVE_KD * data.qvel[qvel_ids]
+            else:
+                torques = STAND_KP * (target - data.qpos[qpos_ids]) - STAND_KD * data.qvel[qvel_ids]
         else:
             if policy is not None and policy_step_number % decimation == 0:
                 obs = make_observation(data, qpos_ids, qvel_ids, defaults, command, last_action)
@@ -332,7 +370,7 @@ def run(args: argparse.Namespace) -> None:
             target_history.append(target.copy())
             delayed_target = target_history[0]
             torques = stiffness * (delayed_target - data.qpos[qpos_ids]) - damping * data.qvel[qvel_ids]
-        data.ctrl[motor_ids] = np.clip(torques, -25.0, 25.0)
+        data.ctrl[motor_ids] = np.clip(torques, -TORQUE_LIMIT, TORQUE_LIMIT)
         mujoco.mj_step(model, data)
 
     try:
@@ -342,8 +380,11 @@ def run(args: argparse.Namespace) -> None:
         else:
             from mujoco import viewer
 
+            speed_index = PLAYBACK_SPEEDS.index(args.speed)
             key_events: queue.SimpleQueue[int] = queue.SimpleQueue()
-            print("Keypad: 1 stand, 0 policy, 8/2 forward, 7/9 lateral, 4/6 yaw, 5 stops. Enable Num Lock.", flush=True)
+            print("Keypad: 1 stand, 0 policy, 3 lie down, 8/2 forward, 7/9 lateral, 4/6 yaw, 5 stops. "
+                  "- slower, + faster, * normal speed. Enable Num Lock.", flush=True)
+            print(f"Playback speed: {PLAYBACK_SPEEDS[speed_index]:g}x", flush=True)
             with viewer.launch_passive(model, data, key_callback=key_events.put) as viewer_handle:
                 viewer_handle.cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
                 viewer_handle.cam.trackbodyid = model.body("base_link").id
@@ -357,12 +398,35 @@ def run(args: argparse.Namespace) -> None:
                             keycode = key_events.get_nowait()
                         except queue.Empty:
                             break
-                        if keycode == glfw.KEY_KP_1:
+                        if keycode in (glfw.KEY_KP_SUBTRACT, glfw.KEY_KP_ADD, glfw.KEY_KP_MULTIPLY):
+                            previous_speed_index = speed_index
+                            if keycode == glfw.KEY_KP_SUBTRACT:
+                                speed_index = max(0, speed_index - 1)
+                            elif keycode == glfw.KEY_KP_ADD:
+                                speed_index = min(len(PLAYBACK_SPEEDS) - 1, speed_index + 1)
+                            else:
+                                speed_index = len(PLAYBACK_SPEEDS) - 1
+                            if speed_index != previous_speed_index:
+                                print(f"Playback speed: {PLAYBACK_SPEEDS[speed_index]:g}x", flush=True)
+                        elif keycode == glfw.KEY_KP_1:
                             if startup.request_stand(data.qpos[qpos_ids]):
                                 target_history.clear()
                                 last_action[:] = 0.0
                                 policy_step_number = 0
-                                print("Standing transition started (3 s).", flush=True)
+                                if startup.prepose_needed:
+                                    print(f"Pre-stand transition started ({PRESTAND_DURATION:g} s), "
+                                          f"then standing ({GETUP_DURATION:g} s).", flush=True)
+                                else:
+                                    print(f"Standing transition started ({GETUP_DURATION:g} s).", flush=True)
+                        elif keycode == glfw.KEY_KP_3:
+                            if startup.request_lie_down(data.qpos[qpos_ids]):
+                                target_history.clear()
+                                last_action[:] = 0.0
+                                policy_step_number = 0
+                                command[:] = 0.0
+                                print(f"Lie-down started: transition pose ({LIE_DOWN_DURATION:g} s), "
+                                      f"then prone ({PRESTAND_DURATION:g} s); "
+                                      "then passive damping.", flush=True)
                         elif keycode == glfw.KEY_KP_0:
                             if startup.request_policy(policy is not None):
                                 target = stand.copy()
@@ -392,7 +456,9 @@ def run(args: argparse.Namespace) -> None:
                     step()
                     viewer_handle.sync()
                     index += 1
-                    time.sleep(max(0.0, model.opt.timestep - (time.perf_counter() - started)))
+                    # Slow wall-clock playback without changing physics or policy timing.
+                    frame_duration = model.opt.timestep / PLAYBACK_SPEEDS[speed_index]
+                    time.sleep(max(0.0, frame_duration - (time.perf_counter() - started)))
     finally:
         if csv_file is not None:
             csv_file.close()
@@ -413,7 +479,10 @@ if __name__ == "__main__":
                         help="Actuator command delay in ms (default: 0)")
     parser.add_argument("--j3-csv", type=Path,
                         help="CSV output path for J3 target and current angles during policy inference; defaults to logs/mujoco/mydog/")
-    parser.add_argument("--duration", type=float, default=0.0, help="Run time in seconds; 0 means until GUI closes")
+    parser.add_argument("--speed", type=float, choices=PLAYBACK_SPEEDS, default=1.0,
+                        help="GUI playback speed multiplier; physics/policy timing stays fixed (default: 1)")
+    parser.add_argument("--duration", type=float, default=0.0,
+                        help="Simulation duration in seconds; 0 means until GUI closes")
     parser.add_argument("--headless", action="store_true")
     try:
         run(parser.parse_args())

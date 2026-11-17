@@ -1,21 +1,18 @@
-ARG ISAACLAB_BASE_IMAGE_ARG
+ARG ISAACLAB_BASE_IMAGE_ARG=isaac-lab-base
 
-# we use the basic isaaclab image as the base
 FROM ${ISAACLAB_BASE_IMAGE_ARG} AS base
 
-ARG DOCKER_ISAACLAB_EXTENSION_TEMPLATE_PATH_ARG
-ENV DOCKER_ISAACLAB_EXTENSION_TEMPLATE_PATH=${DOCKER_ISAACLAB_EXTENSION_TEMPLATE_PATH_ARG}
+ARG UNITREE_RL_LAB_PATH_ARG
+ENV UNITREE_RL_LAB_PATH=${UNITREE_RL_LAB_PATH_ARG}
 
 USER root
 
-# Copy the Isaac Lab Extension Template directory (files to exclude are defined in .dockerignore)
-COPY ../ ${DOCKER_ISAACLAB_EXTENSION_TEMPLATE_PATH}
+COPY . ${UNITREE_RL_LAB_PATH}
 
-# # Install whatever you need as additional dependencies.
-RUN bash -i -c "source ${HOME}/.bashrc && \
-    cd ${DOCKER_ISAACLAB_EXTENSION_TEMPLATE_PATH}/source/unitree_rl_lab && \
-    pip install -e ."
+RUN ${ISAACLAB_PATH}/isaaclab.sh -p -m pip install \
+    prettytable==3.3.0 hidapi==0.14.0.post2 tensordict==0.8.3 argcomplete
 
-# make working directory as the Isaac Lab directory
-# this is the default directory when the container is run
-WORKDIR /workspace
+RUN ${ISAACLAB_PATH}/isaaclab.sh -p -m pip install \
+    --no-build-isolation --no-deps -e ${UNITREE_RL_LAB_PATH}/source/unitree_rl_lab
+
+WORKDIR ${UNITREE_RL_LAB_PATH}

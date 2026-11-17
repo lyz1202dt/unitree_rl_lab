@@ -19,7 +19,7 @@ from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 
 from unitree_rl_lab.tasks.locomotion import mdp
-from unitree_rl_lab.tasks.locomotion.robots.mydog.robot_cfg import DIAN_CFG as ROBOT_CFG
+from unitree_rl_lab.tasks.locomotion.robots.mydog.robot_cfg import DOG03_CFG as ROBOT_CFG
 
 COBBLESTONE_ROAD_CFG = terrain_gen.TerrainGeneratorCfg(
     size=(8.0, 8.0),
@@ -154,8 +154,8 @@ class EventCfg:
         func=mdp.randomize_actuator_gains,
         mode="reset",
         params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=".*_J[123]"),
-            "stiffness_distribution_params": (0.9, 1.1),  # Kp: 36-44 around 40
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*_(hip|thigh|calf)_joint"),
+            "stiffness_distribution_params": (0.8, 1.2),  # Kp: 36-44 around 40
             "damping_distribution_params": (0.8, 1.2),  # Kd: 0.32-0.48 around 0.4
             "operation": "scale",
             "distribution": "uniform",
@@ -204,7 +204,7 @@ class CommandsCfg:
         asset_name="robot",
         resampling_time_range=(10.0, 10.0),
         rel_standing_envs=0.1,
-        debug_vis=True,
+        debug_vis=False,
         ranges=mdp.UniformLevelVelocityCommandCfg.Ranges(
             lin_vel_x=(-0.1, 0.1), lin_vel_y=(-0.1, 0.1), ang_vel_z=(-1, 1)
         ),
@@ -317,7 +317,7 @@ class RewardsCfg:
         func=mdp.feet_air_time,
         weight=0.1,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT_Link"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT"),
             "command_name": "base_velocity",
             "threshold": 0.5,
         },
@@ -325,14 +325,14 @@ class RewardsCfg:
     air_time_variance = RewTerm(
         func=mdp.air_time_variance_penalty,
         weight=-1.0,
-        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT_Link")},
+        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT")},
     )
     feet_slide = RewTerm(
         func=mdp.feet_slide,
         weight=-0.1,
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*_FOOT_Link"),
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT_Link"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_FOOT"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT"),
         },
     )
     # feet_contact_forces = RewTerm(
@@ -340,7 +340,7 @@ class RewardsCfg:
     #     weight=-0.02,
     #     params={
     #         "threshold": 100.0,
-    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT_Link"),
+    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT"),
     #     },
     # )
 
@@ -350,7 +350,7 @@ class RewardsCfg:
         weight=-1,
         params={
             "threshold": 1,
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_J[123]_Link"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_(hip|thigh|calf)"),
         },
     )
 

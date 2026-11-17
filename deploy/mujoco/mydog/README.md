@@ -8,12 +8,17 @@ from the original non-convex mesh. The oversized base collision STL is converted
 to OBJ without removing triangles to satisfy MuJoCo's STL face limit.
 Physics runs at 200 Hz; policy inference runs at 50 Hz.
 The scene's home keyframe uses J3 angles of -0.5 rad on FL/RL and +0.5 rad on
-FR/RR. The simulator starts instead in the prone pose from
-`custom_quad/config/deployment_policy/custom_quad/base.yaml`, with the base
-near the floor and passive damping (Kp=0, Kd=0.3). It uses that config's fixed
-stand pose and a three-second transition. MuJoCo needs Kp=100, Kd=1 for this
-get-up under its 25 Nm torque limit; the hardware fixed gains of 25/0.5 do not
-raise this model in the simulation. Policy inference uses the default pose
+FR/RR. The simulator starts instead at `PRONE_POS`, with the base at 0.165 m
+and passive damping (Kp=0, Kd=0.3). These initial
+angles can change under gravity and contact while passive. NumPad 1 first moves from the
+current joint angles to `PRESTAND_POS` over one second, then uses a three-second
+transition to `default_joint_pos` from the loaded `deploy.yaml`, matching the
+policy's default pose and joint order. Without a policy or `--deploy`, it uses
+the simulator's built-in default pose. The shared transition pose `PRESTAND_POS`
+(J1/J2/J3, radians) is currently FL/RL `0/0.9/0.5` and FR/RR `0/-0.9/-0.5`.
+The separate `PRONE_POS` is FL/RL `0/-0.9/0.6` and FR/RR `0/0.9/-0.6`.
+All posture transitions and standing hold use `STAND_KP`/`STAND_KD` in `simulate.py`
+(currently 65/1) under the 25 Nm torque limit. Policy inference uses the default pose
 recorded in the policy's `deploy.yaml` and Kp=40, Kd=0.4.
 During training, each environment redraws each leg joint's PD gains on reset:
 Kp is uniform in [36, 44] and Kd in [0.32, 0.48]. Isaac Lab play and this
@@ -52,25 +57,43 @@ The `scene.xml` joint `damping="0"` is intentional: Kd is applied by the
 controller in `simulate.py`, so adding it there would count damping twice.
 The `--vx`, `--vy` and `--yaw` options set the command that takes effect after
 policy start. Click the MuJoCo window and enable Num Lock. Press NumPad 1 to
-move from passive/prone to the fixed stand pose over three seconds; press
+move from passive/prone through the pre-stand pose to standing over four seconds; press
 NumPad 0 after the transition to start policy inference. Pressing NumPad 1
-again while the policy runs returns to the fixed stand pose. The numeric
+again while the policy runs returns directly to the stand pose over three seconds.
+NumPad 3 during get-up, standing or policy control clears the velocity commands,
+interpolates from the current joint angles to `PRESTAND_POS` over three seconds,
+then to `PRONE_POS` over one second before switching to passive damping.
+NumPad 1 can start another get-up once
+lie-down finishes. The numeric
 keypad controls are:
 
 | Key | Command change |
 | --- | --- |
 | 1 | Start standing transition; return to stand from policy |
 | 0 | Start policy inference after standing |
+| 3 | Transition pose over three seconds, prone over one second, then passive damping |
 | 8 / 2 | Forward speed +0.1 / -0.1 m/s |
 | 7 / 9 | Leftward speed +0.1 / -0.1 m/s |
 | 4 / 6 | Yaw rate +0.1 / -0.1 rad/s |
 | 5 | Set all commands to zero |
+| - (keypad subtract) | Slow playback by one preset |
+| + (keypad add) | Speed playback up by one preset, up to 1x |
+| * (keypad multiply) | Restore normal 1x playback |
 
 The limits match the task's command range: forward `[-1, 1]` m/s, sideways
 `[-0.4, 0.4]` m/s and yaw `[-1, 1]` rad/s. Current values are printed in the
 terminal. Velocity keys affect the loaded policy only after NumPad 0. Without
 `--policy`, the robot can stand but cannot enter inference. The example
 checkpoint may still be in training, so stable walking is not guaranteed.
+
+For slow motion, add `--speed 0.25` to the run command. Available playback
+speeds are `1`, `0.5`, `0.25`, and `0.1`; the default is `1`. The keypad
+subtract/add/multiply keys work in every startup and control state. The current
+multiplier is printed at startup and whenever it changes. Playback pacing only
+adds wall-clock waiting: physics still advances by 5 ms per step, policy inference
+runs every 20 ms of simulation time, and CSV timestamps and `--duration` use
+simulation time. At 0.25x, one simulation second takes about four wall-clock
+seconds. Headless mode runs without playback pacing.
 
 To test a fixed delay, add `--action-delay-ms 5` or `10`. The selected delay is
 printed at startup.

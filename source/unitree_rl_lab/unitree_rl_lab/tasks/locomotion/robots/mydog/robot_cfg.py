@@ -1,4 +1,4 @@
-"""Articulation configuration for the DIAN robot used by the mydog task."""
+"""Articulation configuration for the 03dog robot used by the mydog task."""
 
 import os
 
@@ -8,21 +8,25 @@ from isaaclab.assets import ArticulationCfg
 from isaaclab.utils import configclass
 
 
-DIAN_USD_PATH = os.environ.get(
-    "DIAN_USD_PATH", "/home/hi/下载/点足总装修订版10-18/DIAN/usd/DIAN.usd"
+DOG03_URDF_PATH = os.environ.get(
+    "DOG03_URDF_PATH",
+    "/home/lyz/Project/AT_robot_lab/source/robot_lab/data/Robots/03dog/urdf/03dog.urdf",
 )
 
 
 @configclass
-class DianArticulationCfg(ArticulationCfg):
+class Dog03ArticulationCfg(ArticulationCfg):
     """Articulation with an explicit joint order for deployment export."""
 
     joint_sdk_names: list[str] = None
 
 
-DIAN_CFG = DianArticulationCfg(
-    spawn=sim_utils.UsdFileCfg(
-        usd_path=DIAN_USD_PATH,
+DOG03_CFG = Dog03ArticulationCfg(
+    spawn=sim_utils.UrdfFileCfg(
+        fix_base=False,
+        merge_fixed_joints=False,
+        replace_cylinders_with_capsules=False,
+        asset_path=DOG03_URDF_PATH,
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -35,43 +39,41 @@ DIAN_CFG = DianArticulationCfg(
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
             enabled_self_collisions=False,
-            solver_position_iteration_count=8,
-            solver_velocity_iteration_count=4,
+            solver_position_iteration_count=4,
+            solver_velocity_iteration_count=0,
+        ),
+        joint_drive=sim_utils.UrdfConverterCfg.JointDriveCfg(
+            gains=sim_utils.UrdfConverterCfg.JointDriveCfg.PDGainsCfg(stiffness=0, damping=0)
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.44),
+        pos=(0.0, 0.0, 0.40),
         joint_pos={
-            "FL_J1": 0.0,
-            "FL_J2": 0.9,
-            "FL_J3": -0.5,
-            "FR_J1": 0.0,
-            "FR_J2": -0.9,
-            "FR_J3": 0.5,
-            "RL_J1": 0.0,
-            "RL_J2": 0.7,
-            "RL_J3": -0.5,
-            "RR_J1": 0.0,
-            "RR_J2": -0.7,
-            "RR_J3": 0.5,
+            ".*_hip_joint": 0.0,
+            ".*_thigh_joint": -0.7854,
+            ".*_calf_joint": 0.0,
         },
         joint_vel={".*": 0.0},
     ),
+    soft_joint_pos_limit_factor=0.9,
     actuators={
         "legs": DelayedPDActuatorCfg(
-            joint_names_expr=[".*_J[123]"],
-            effort_limit=25.0,
+            joint_names_expr=[".*"],
+            effort_limit=30.0,
             velocity_limit=30.0,
             stiffness=40.0,
-            damping=0.4,
-            min_delay=0,
-            max_delay=0,  # Restore 2 for random 0/5/10 ms delay.
+            damping=1.0,
+            friction=0.32,
+            dynamic_friction=0.29274320,
+            viscous_friction=0.02658733,
+            min_delay=1,
+            max_delay=2,
         ),
     },
     joint_sdk_names=[
-        "FL_J1", "FL_J2", "FL_J3",
-        "FR_J1", "FR_J2", "FR_J3",
-        "RL_J1", "RL_J2", "RL_J3",
-        "RR_J1", "RR_J2", "RR_J3",
+        "FL_hip_joint", "FL_thigh_joint", "FL_calf_joint",
+        "FR_hip_joint", "FR_thigh_joint", "FR_calf_joint",
+        "RL_hip_joint", "RL_thigh_joint", "RL_calf_joint",
+        "RR_hip_joint", "RR_thigh_joint", "RR_calf_joint",
     ],
 )

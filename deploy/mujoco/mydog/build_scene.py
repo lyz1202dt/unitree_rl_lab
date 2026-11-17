@@ -91,7 +91,8 @@ def build(source: Path, destination: Path) -> None:
                   texrepeat="2 2", texuniform="true", reflectance="0")
     world = ET.SubElement(mj, "worldbody")
     ET.SubElement(world, "light", pos="0 0 3", directional="true", dir="0 0 -1")
-    ET.SubElement(world, "geom", name="ground", type="plane", size="10 10 0.1",
+    # Zero X/Y sizes render an infinite plane, matching its collision extent.
+    ET.SubElement(world, "geom", name="ground", type="plane", size="0 0 0.1",
                   material="ground_material", friction="1 0.005 0.0001",
                   contype="2", conaffinity="1")
     actuators = ET.SubElement(mj, "actuator")
