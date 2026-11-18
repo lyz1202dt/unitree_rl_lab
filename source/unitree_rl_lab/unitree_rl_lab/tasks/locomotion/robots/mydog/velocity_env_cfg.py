@@ -318,12 +318,12 @@ class RewardsCfg:
     )
 
     # -- base
-    base_linear_velocity = RewTerm(func=mdp.lin_vel_z_l2, weight=-3.0)
-    base_angular_velocity = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.2)
+    base_linear_velocity = RewTerm(func=mdp.lin_vel_z_l2, weight=-4.0)
+    base_angular_velocity = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.3)
     joint_vel = RewTerm(func=mdp.joint_vel_l2, weight=-0.0015)
-    joint_acc = RewTerm(func=mdp.joint_acc_l2, weight=-1.0e-6)
+    joint_acc = RewTerm(func=mdp.joint_acc_l2, weight=-1.5e-6)
     joint_torques = RewTerm(func=mdp.joint_torques_l2, weight=-2e-4)
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.15)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.25)
     dof_pos_limits = RewTerm(func=mdp.joint_pos_limits, weight=-10.0)
     energy = RewTerm(func=mdp.energy, weight=-2e-5)
 
@@ -335,8 +335,8 @@ class RewardsCfg:
         weight=-0.4,
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=".*"),
-            "stand_still_scale": 4.0,
-            "velocity_threshold": 0.15,
+            "stand_still_scale": 5.0,
+            "velocity_threshold": 0.25,
         },
     )
 
@@ -370,9 +370,9 @@ class RewardsCfg:
     )
     feet_contact_forces = RewTerm(
         func=mdp.contact_forces,
-        weight=-0.002,
+        weight=-0.003,
         params={
-            "threshold": 100.0,
+            "threshold": 80.0,
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT"),
         },
     )
