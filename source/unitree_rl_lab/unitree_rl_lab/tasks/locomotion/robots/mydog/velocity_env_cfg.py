@@ -121,10 +121,10 @@ class EventCfg:
         func=mdp.randomize_rigid_body_material,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
-            "static_friction_range": (0.3, 1.2),
-            "dynamic_friction_range": (0.3, 1.2),
-            "restitution_range": (0.0, 0.15),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_FOOT"),
+            "static_friction_range": (0.5, 0.9),
+            "dynamic_friction_range": (0.4, 0.8),
+            "restitution_range": (0.0, 0.5),
             "num_buckets": 64,
         },
     )
@@ -136,6 +136,27 @@ class EventCfg:
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
             "mass_distribution_params": (-1.0, 3.0),
             "operation": "add",
+            "recompute_inertia": True,
+        },
+    )
+
+    other_body_mass = EventTerm(
+        func=mdp.randomize_rigid_body_mass,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names="^(?!.*base_link).*"),
+            "mass_distribution_params": (0.7, 1.3),
+            "operation": "scale",
+            "recompute_inertia": True,
+        },
+    )
+
+    base_com = EventTerm(
+        func=mdp.randomize_rigid_body_com,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
+            "com_range": {"x": (-0.05, 0.05), "y": (-0.05, 0.05), "z": (-0.05, 0.05)},
         },
     )
 
@@ -145,8 +166,8 @@ class EventCfg:
         mode="reset",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "force_range": (0.0, 0.0),
-            "torque_range": (-0.0, 0.0),
+            "force_range": (-20.0, 20.0),
+            "torque_range": (-8.0, 8.0),
         },
     )
 
@@ -154,9 +175,9 @@ class EventCfg:
         func=mdp.randomize_actuator_gains,
         mode="reset",
         params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=".*_(hip|thigh|calf)_joint"),
-            "stiffness_distribution_params": (0.8, 1.2),  # Kp: 36-44 around 40
-            "damping_distribution_params": (0.8, 1.2),  # Kd: 0.32-0.48 around 0.4
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*"),
+            "stiffness_distribution_params": (0.8, 1.2),
+            "damping_distribution_params": (0.8, 1.2),
             "operation": "scale",
             "distribution": "uniform",
         },
@@ -166,14 +187,21 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-            "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
-            "velocity_range": {
-                "x": (0.0, 0.0),
-                "y": (0.0, 0.0),
-                "z": (0.0, 0.0),
-                "roll": (0.0, 0.0),
-                "pitch": (0.0, 0.0),
+            "pose_range": {
+                "x": (-0.5, 0.5),
+                "y": (-0.5, 0.5),
+                "z": (0.0, 0.2),
+                "roll": (-1.0, 1.0),
+                "pitch": (-1.0, 1.0),
                 "yaw": (0.0, 0.0),
+            },
+            "velocity_range": {
+                "x": (-1.5, 1.5),
+                "y": (-1.5, 1.5),
+                "z": (-1.0, 0.3),
+                "roll": (-1.0, 1.0),
+                "pitch": (-1.0, 1.0),
+                "yaw": (-1.0, 1.0),
             },
         },
     )
@@ -183,7 +211,7 @@ class EventCfg:
         mode="reset",
         params={
             "position_range": (1.0, 1.0),
-            "velocity_range": (-1.0, 1.0),
+            "velocity_range": (0.0, 0.0),
         },
     )
 
@@ -191,8 +219,8 @@ class EventCfg:
     push_robot = EventTerm(
         func=mdp.push_by_setting_velocity,
         mode="interval",
-        interval_range_s=(5.0, 10.0),
-        params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}},
+        interval_range_s=(10.0, 15.0),
+        params={"velocity_range": {"x": (-0.7, 0.7), "y": (-0.7, 0.7)}},
     )
 
 
