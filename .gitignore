@@ -73,6 +73,7 @@ datasets
 *.obj
 *.mtl
 *.STL
+!source/unitree_rl_lab/unitree_rl_lab/tasks/locomotion/robots/mydog/assets/03dog/meshes/*.STL
 **/env.yaml
 
 # Mimic

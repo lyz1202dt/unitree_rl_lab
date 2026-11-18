@@ -1,6 +1,7 @@
 """Articulation configuration for the 03dog robot used by the mydog task."""
 
 import os
+from pathlib import Path
 
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import DelayedPDActuatorCfg
@@ -10,7 +11,7 @@ from isaaclab.utils import configclass
 
 DOG03_URDF_PATH = os.environ.get(
     "DOG03_URDF_PATH",
-    "/home/lyz/Project/AT_robot_lab/source/robot_lab/data/Robots/03dog/urdf/03dog.urdf",
+    str(Path(__file__).resolve().parent / "assets" / "03dog" / "urdf" / "03dog.urdf"),
 )
 
 

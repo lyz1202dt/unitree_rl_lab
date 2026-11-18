@@ -1,6 +1,6 @@
 # 容器训练：mydog
 
-以下命令均从项目根目录执行。需要本机已有 `isaac-lab-base:latest` 镜像、可供 Docker 使用的 NVIDIA GPU，以及 `/home/lyz/Project/AT_robot_lab/source/robot_lab/data/Robots/03dog` 下的 URDF 和网格文件。容器通过 `docker/.env.base` 中的 `HOST_DOG03_ASSET_PATH` 只读挂载该目录。
+以下命令均从项目根目录执行。需要本机已有 `isaac-lab-base:latest` 镜像和可供 Docker 使用的 NVIDIA GPU。03dog 的 URDF 与网格文件位于项目内 `source/unitree_rl_lab/unitree_rl_lab/tasks/locomotion/robots/mydog/assets/03dog/`，随项目一同挂载到容器。
 
 ## 1. 构建镜像
 
@@ -53,7 +53,7 @@ ls -lt logs/rsl_rl/mydog
   --resume --load_run RUN_DIR --checkpoint model_数字.pt
 ```
 
-续训会读取旧检查点，并创建新的时间戳目录保存本次结果。切换到 03dog 后应重新训练，不要续训旧 DIAN 检查点。`mydog` 使用 `DOG03_URDF_PATH` 指向容器内 `/workspace/03dog/urdf/03dog.urdf`；非容器运行时默认读取上述 `AT_robot_lab` 路径，也可通过同名环境变量覆盖。
+续训会读取旧检查点，并创建新的时间戳目录保存本次结果。切换到 03dog 后应重新训练，不要续训旧 DIAN 检查点。`mydog` 默认读取项目内 `assets/03dog/urdf/03dog.urdf`，也可通过 `DOG03_URDF_PATH` 环境变量覆盖。
 
 
 ## 4. 导出 ONNX 策略

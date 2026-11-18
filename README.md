@@ -43,7 +43,7 @@
 /workspace/isaaclab/isaaclab.sh -p scripts/rsl_rl/train.py --task mydog --headless --num_envs 64 --max_iterations 3000
 ```
 
-容器默认使用项目内的 `DIAN_compressed/DIAN.usd`。该 USD 及其 `configuration/` 文件被 Git 忽略，换机器时需自行放到相同的项目目录。若容器日志由 root 写入，宿主机读取或清理时可能需要调整文件权限。
+训练使用项目内 `source/unitree_rl_lab/unitree_rl_lab/tasks/locomotion/robots/mydog/assets/03dog/urdf/03dog.urdf`，配套网格位于同级 `meshes/` 目录。容器直接挂载当前项目，无需额外挂载机器人资产。若容器日志由 root 写入，宿主机读取或清理时可能需要调整文件权限。
 
 ## 二、sim2sim
 

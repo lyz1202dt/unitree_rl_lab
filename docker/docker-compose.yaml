@@ -2,7 +2,6 @@ name: unitree-rl-lab
 
 x-default-unitree-rl-lab-environment: &default-unitree-rl-lab-environment
   - OMNI_KIT_ALLOW_ROOT=1
-  - DOG03_URDF_PATH=/workspace/03dog/urdf/03dog.urdf
 
 x-default-unitree-rl-lab-deploy: &default-unitree-rl-lab-deploy
   resources:
@@ -26,10 +25,6 @@ services:
       - type: bind
         source: ../
         target: ${DOCKER_UNITREE_RL_LAB_PATH}
-      - type: bind
-        source: ${HOST_DOG03_ASSET_PATH}
-        target: /workspace/03dog
-        read_only: true
     working_dir: ${DOCKER_UNITREE_RL_LAB_PATH}
     network_mode: host
     environment: *default-unitree-rl-lab-environment
